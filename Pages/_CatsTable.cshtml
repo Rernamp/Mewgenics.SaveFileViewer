@@ -401,55 +401,7 @@
         direction: 'asc'
     };
 
-    // Save filters to localStorage
-    function saveFilters() {
-        const filters = {
-            searchName: document.getElementById('searchName').value,
-            filterSex: document.getElementById('filterSex').value,
-            filterRoom: document.getElementById('filterRoom').value,
-            filterStatus: document.getElementById('filterStatus').value,
-            minLevel: document.getElementById('minLevel').value,
-            maxLevel: document.getElementById('maxLevel').value,
-            filterMature: document.getElementById('filterMature').value,
-            minAge: document.getElementById('minAge').value,
-            maxAge: document.getElementById('maxAge').value,
-            minStr: document.getElementById('minStr').value,
-            maxStr: document.getElementById('maxStr').value,
-            minDex: document.getElementById('minDex').value,
-            maxDex: document.getElementById('maxDex').value,
-            minCon: document.getElementById('minCon').value,
-            maxCon: document.getElementById('maxCon').value,
-            minInt: document.getElementById('minInt').value,
-            maxInt: document.getElementById('maxInt').value,
-            minCha: document.getElementById('minCha').value,
-            maxCha: document.getElementById('maxCha').value,
-            minSpd: document.getElementById('minSpd').value,
-            maxSpd: document.getElementById('maxSpd').value,
-            minLuck: document.getElementById('minLuck').value,
-            maxLuck: document.getElementById('maxLuck').value
-        };
-        localStorage.setItem('catFilters', JSON.stringify(filters));
-    }
-
-    // Load filters from localStorage
-    function loadFilters() {
-        const saved = localStorage.getItem('catFilters');
-        if (saved) {
-            try {
-                const filters = JSON.parse(saved);
-                Object.keys(filters).forEach(key => {
-                    const element = document.getElementById(key);
-                    if (element) {
-                        element.value = filters[key];
-                    }
-                });
-            } catch (e) {
-                console.error('Error loading filters:', e);
-            }
-        }
-    }
-
-    // Sort table by column
+        // Sort table by column
     function sortTable(column) {
         if (currentSort.column === column) {
             // Toggle direction
@@ -645,9 +597,6 @@
         // Update filter tags and count
         updateFilterTags();
         document.getElementById('visibleCount').textContent = visibleCount;
-
-        // Save filters
-        saveFilters();
     }
 
     function updateFilterTags() {
@@ -739,7 +688,6 @@
             document.getElementById('catsTableContainer').innerHTML = html;
 
             // Reload filters and sort after refresh
-            loadFilters();
             updateSortIndicators();
             applyFilters();
 
@@ -755,7 +703,6 @@
 
     // Initialize on page load
     document.addEventListener('DOMContentLoaded', function () {
-        loadFilters();
         updateSortIndicators();
         applyFilters();
 
