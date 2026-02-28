@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mewgenics.SaveFileViewer", "Mewgenics.SaveFileViewer.csproj", "{BE74D81C-B54B-A521-93AD-9EB8436C68E3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BE74D81C-B54B-A521-93AD-9EB8436C68E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE74D81C-B54B-A521-93AD-9EB8436C68E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE74D81C-B54B-A521-93AD-9EB8436C68E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE74D81C-B54B-A521-93AD-9EB8436C68E3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {BB975B7B-0063-4DEE-8606-7751C11F13EE}
+	EndGlobalSection
+EndGlobal
