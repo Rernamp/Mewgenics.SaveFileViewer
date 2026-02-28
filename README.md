@@ -94,3 +94,5 @@ This project was created with the assistance of AI (neural networks). As such:
 - It does exactly what it needs to do and nothing more
 
 This tool comes with no guarantees of any kind. It is provided "as is", without warranty of any kind, express or implied. Use it at your own risk.
+
+This is a third-party tool for Mewgenics and is not officially affiliated with the game developers.
