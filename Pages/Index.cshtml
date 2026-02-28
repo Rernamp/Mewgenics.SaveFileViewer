@@ -1,0 +1,185 @@
+﻿@page
+@model Mewgenics.SaveFileViewer.Pages.IndexModel
+@{
+    ViewData["Title"] = "Mewgenics - Cats in House";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        .cat-table {
+            font-size: 0.9rem;
+        }
+
+            .cat-table th {
+                position: sticky;
+                top: 0;
+                background: white;
+                z-index: 10;
+                box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
+            }
+
+        .status-badge {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+
+        .status-dead {
+            background-color: #dc3545;
+        }
+
+        .status-sick {
+            background-color: #ffc107;
+        }
+
+        .stat-value {
+            font-family: monospace;
+            text-align: right;
+        }
+
+        .cat-icon {
+            font-size: 1.5rem;
+            color: #6c757d;
+        }
+
+        .male {
+            color: #0d6efd;
+        }
+
+        .female {
+            color: #d63384;
+        }
+
+        .refresh-btn {
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+            .refresh-btn:hover {
+                transform: rotate(180deg);
+            }
+
+            .refresh-btn.spinning {
+                animation: spin 1s linear infinite;
+            }
+
+        @@keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .stat-tooltip {
+            cursor: help;
+            border-bottom: 1px dotted #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid py-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col">
+                <h1 class="display-6">
+                    <i class="bi bi-house-heart-fill me-2"></i>
+                    Cats in House
+                </h1>
+                <p class="text-muted">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Total: <span id="catCount">@Model.HouseCats.Count</span> cats
+                    <span class="mx-2">|</span>
+                    <i class="bi bi-clock me-1"></i>
+                    Last update: <span id="lastUpdate">@Model.LastUpdate.ToString("HH:mm:ss")</span>
+                    <i class="bi bi-arrow-repeat refresh-btn ms-3"
+                       id="refreshBtn"
+                       title="Refresh data"
+                       onclick="refreshData()"></i>
+                </p>
+            </div>
+        </div>
+
+        <!-- Stats Summary -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-white bg-primary">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Cats</h5>
+                        <h2>@Model.HouseCats.Count</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-white bg-success">
+                    <div class="card-body">
+                        <h5 class="card-title">Male</h5>
+                        <h2>@Model.HouseCats.Count(c => c.Sex == "Male")</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-white bg-info">
+                    <div class="card-body">
+                        <h5 class="card-title">Female</h5>
+                        <h2>@Model.HouseCats.Count(c => c.Sex == "Female")</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-white bg-warning">
+                    <div class="card-body">
+                        <h5 class="card-title">Sick</h5>
+                        <h2>@Model.HouseCats.Count(c => c.IsSick)</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cats Table -->
+        <div id="catsTableContainer">
+            @await Html.PartialAsync("_CatsTable", Model.HouseCats)
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        async function refreshData() {
+            const refreshBtn = document.getElementById('refreshBtn');
+            refreshBtn.classList.add('spinning');
+
+            try {
+                const response = await fetch('/Index?handler=Refresh');
+                if (!response.ok) throw new Error('Refresh failed');
+
+                const html = await response.text();
+                document.getElementById('catsTableContainer').innerHTML = html;
+
+                // Update count and time
+                const newCount = document.querySelectorAll('#catsTable tbody tr').length;
+                document.getElementById('catCount').textContent = newCount;
+                document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+            } catch (error) {
+                console.error('Refresh error:', error);
+                alert('Failed to refresh data');
+            } finally {
+                refreshBtn.classList.remove('spinning');
+            }
+        }
+
+        // Auto-refresh every 30 seconds
+        setInterval(refreshData, 30000);
+    </script>
+</body>
+</html>

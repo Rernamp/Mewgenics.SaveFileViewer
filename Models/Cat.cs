@@ -136,6 +136,11 @@ namespace Mewgenics.SaveFileViewer.Models {
         public string? ClassName { get; set; }
         public bool IsDead { get; set; }
         public bool IsSick { get; set; }
+        public bool IsRetired { get; set; }
+        public int? BirthdayDay { get; set; }
+        public int? Age { get; set; }
+        public CatStats? Stats { get; set; }
+
         public string DisplayName => $"{Name} (Key: {Key})";
     }
 

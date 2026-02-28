@@ -108,64 +108,65 @@ namespace Mewgenics.SaveFileViewer.Services {
         }
 
         public async Task<List<HouseCat>> GetHouseCatsAsync() {
-            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+            var allCats = await GetAllCatsAsync();
+            var catsDict = allCats.ToDictionary(c => c.Key, c => c);
 
-            // Получаем BLOB house_state из таблицы files
             var houseState = await _context.Files
                 .Where(f => f.Key == "house_state")
                 .Select(f => f.Data)
                 .FirstOrDefaultAsync();
 
             if (houseState == null || houseState.Length == 0) {
-                _logger.LogWarning("No house_state found in database");
                 return new List<HouseCat>();
             }
 
-            // Парсим house_state
             var houseCatEntries = ParseHouseState(houseState);
-
-            if (houseCatEntries.Count == 0) {
-                return new List<HouseCat>();
-            }
-
-            // Получаем всех котов из кэша или загружаем
-            var allCats = await GetAllCatsAsync();
-            var catsDict = allCats.ToDictionary(c => c.Key, c => c);
-
-            // Формируем результат
+            var currentDay = await GetCurrentDayAsync(); // Добавьте этот метод
             var houseCats = new List<HouseCat>();
 
             foreach (var entry in houseCatEntries) {
                 if (catsDict.TryGetValue(entry.Key, out var cat)) {
-                    // Получаем уровень из Stats (если Stats не null)
-                    int? level = null;
-                    if (cat.Stats != null) {
-                        // В оригинальном TS коде уровень может храниться в cat.Stats.Level
-                        // или вычисляться из характеристик
-                        level = cat.Stats.Level > 0 ? cat.Stats.Level : null;
-                    }
+                    var age = currentDay.HasValue && cat.BirthdayDay.HasValue
+                        ? currentDay.Value - cat.BirthdayDay.Value
+                        : (int?)null;
 
                     houseCats.Add(new HouseCat {
                         Key = cat.Key,
                         Name = cat.Name,
                         Sex = cat.Sex,
                         Room = entry.Room,
-                        Level = level,
+                        Level = cat.Stats?.Level,
                         ClassName = cat.ClassName,
                         IsDead = cat.Flags?.Dead ?? false,
-                        IsSick = cat.Flags?.IsSick ?? false
+                        IsSick = cat.Flags?.IsSick ?? false,
+                        IsRetired = cat.Flags?.Retired ?? false,
+                        BirthdayDay = cat.BirthdayDay,
+                        Age = age,
+                        Stats = cat.Stats
                     });
-                } else {
-                    _logger.LogWarning($"Cat with key {entry.Key} found in house_state but not in cats table");
                 }
             }
-
-            stopwatch.Stop();
-            _logger.LogInformation($"Returned {houseCats.Count} house cats in {stopwatch.ElapsedMilliseconds}ms");
 
             return houseCats.OrderBy(c => c.Name).ToList();
         }
 
+        private async Task<int?> GetCurrentDayAsync() {
+            var dayData = await _context.Files
+                .Where(f => f.Key == "current_day")
+                .Select(f => f.Data)
+                .FirstOrDefaultAsync();
+
+            if (dayData == null) return null;
+
+            // Парсинг current_day из BLOB
+            try {
+                var dayStr = System.Text.Encoding.ASCII.GetString(dayData).TrimEnd('\0');
+                if (int.TryParse(dayStr, out var day))
+                    return day;
+            } catch { }
+
+            return null;
+        }
         private List<HouseCatEntry> ParseHouseState(byte[] blob) {
             var result = new List<HouseCatEntry>();
 

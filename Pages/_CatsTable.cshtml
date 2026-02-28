@@ -1,0 +1,846 @@
+﻿@model List<Mewgenics.SaveFileViewer.Models.HouseCat>
+
+<!-- Filter Section -->
+<div class="card mb-4 shadow-sm">
+    <div class="card-header bg-light">
+        <h5 class="mb-0">
+            <i class="bi bi-funnel me-2"></i>Filters
+            <button class="btn btn-sm btn-outline-secondary float-end" type="button" onclick="resetFilters()">
+                <i class="bi bi-arrow-counterclockwise"></i> Reset
+            </button>
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <!-- Search by name -->
+            <div class="col-md-3">
+                <label class="form-label"><i class="bi bi-search me-1"></i>Search Name</label>
+                <input type="text" class="form-control filter-input" id="searchName" placeholder="Enter name..." onkeyup="applyFilters()">
+            </div>
+
+            <!-- Sex filter -->
+            <div class="col-md-2">
+                <label class="form-label"><i class="bi bi-gender-ambiguous me-1"></i>Sex</label>
+                <select class="form-select filter-input" id="filterSex" onchange="applyFilters()">
+                    <option value="all">All</option>
+                    <option value="Male">♂ Male</option>
+                    <option value="Female">♀ Female</option>
+                    <option value="Unknown">❓ Unknown</option>
+                </select>
+            </div>
+
+            <!-- Room filter -->
+            <div class="col-md-2">
+                <label class="form-label"><i class="bi bi-door-open me-1"></i>Room</label>
+                <select class="form-select filter-input" id="filterRoom" onchange="applyFilters()">
+                    <option value="all">All</option>
+                    @{
+                        var rooms = Model.Select(c => c.Room).Distinct().OrderBy(r => r).ToList();
+                        foreach (var room in rooms) {
+                            <option value="@room">@room</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <!-- Status filter -->
+            <div class="col-md-2">
+                <label class="form-label"><i class="bi bi-heart-pulse me-1"></i>Status</label>
+                <select class="form-select filter-input" id="filterStatus" onchange="applyFilters()">
+                    <option value="all">All</option>
+                    <option value="healthy">Healthy</option>
+                    <option value="sick">Sick</option>
+                    <option value="dead">Dead</option>
+                    <option value="retired">Retired</option>
+                </select>
+            </div>
+
+            <!-- Level range -->
+            <div class="col-md-3">
+                <label class="form-label"><i class="bi bi-bar-chart me-1"></i>Level Range</label>
+                <div class="d-flex gap-2">
+                    <input type="number" class="form-control filter-input" id="minLevel" placeholder="Min" min="1" max="10" onchange="applyFilters()">
+                    <input type="number" class="form-control filter-input" id="maxLevel" placeholder="Max" min="1" max="10" onchange="applyFilters()">
+                </div>
+            </div>
+
+            <!-- Mature filter -->
+            <div class="col-md-2">
+                <label class="form-label"><i class="bi bi-egg-fried me-1"></i>Maturity</label>
+                <select class="form-select filter-input" id="filterMature" onchange="applyFilters()">
+                    <option value="all">All</option>
+                    <option value="mature">Mature (≥30 days)</option>
+                    <option value="immature">Immature (<30 days)</option>
+                </select>
+            </div>
+
+            <!-- Age range -->
+            <div class="col-md-3">
+                <label class="form-label"><i class="bi bi-calendar me-1"></i>Age Range (days)</label>
+                <div class="d-flex gap-2">
+                    <input type="number" class="form-control filter-input" id="minAge" placeholder="Min" min="0" onchange="applyFilters()">
+                    <input type="number" class="form-control filter-input" id="maxAge" placeholder="Max" min="0" onchange="applyFilters()">
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Filters Row -->
+        <div class="row mt-3">
+            <div class="col-12">
+                <h6 class="mb-3"><i class="bi bi-bar-chart-steps me-2"></i>Stats Filters</h6>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">⚔️ STR Range</label>
+                <div class="d-flex gap-2">
+                    <input type="number" class="form-control filter-input stat-filter" id="minStr" placeholder="Min" min="1" max="10" onchange="applyFilters()">
+                    <input type="number" class="form-control filter-input stat-filter" id="maxStr" placeholder="Max" min="1" max="10" onchange="applyFilters()">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">🛡️ DEX Range</label>
+                <div class="d-flex gap-2">
+                    <input type="number" class="form-control filter-input stat-filter" id="minDex" placeholder="Min" min="1" max="10" onchange="applyFilters()">
+                    <input type="number" class="form-control filter-input stat-filter" id="maxDex" placeholder="Max" min="1" max="10" onchange="applyFilters()">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">❤️ CON Range</label>
+                <div class="d-flex gap-2">
+                    <input type="number" class="form-control filter-input stat-filter" id="minCon" placeholder="Min" min="1" max="10" onchange="applyFilters()">
+                    <input type="number" class="form-control filter-input stat-filter" id="maxCon" placeholder="Max" min="1" max="10" onchange="applyFilters()">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">🧠 INT Range</label>
+                <div class="d-flex gap-2">
+                    <input type="number" class="form-control filter-input stat-filter" id="minInt" placeholder="Min" min="1" max="10" onchange="applyFilters()">
+                    <input type="number" class="form-control filter-input stat-filter" id="maxInt" placeholder="Max" min="1" max="10" onchange="applyFilters()">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">⚡ SPD Range</label>
+                <div class="d-flex gap-2">
+                    <input type="number" class="form-control filter-input stat-filter" id="minSpd" placeholder="Min" min="1" max="10" onchange="applyFilters()">
+                    <input type="number" class="form-control filter-input stat-filter" id="maxSpd" placeholder="Max" min="1" max="10" onchange="applyFilters()">
+                </div>
+            </div>
+        </div>
+
+        <!-- Active filters display -->
+        <div class="mt-3" id="activeFilters" style="display: none;">
+            <hr>
+            <div class="d-flex align-items-center">
+                <span class="badge bg-secondary me-2">Active filters:</span>
+                <div id="filterTags" class="d-flex flex-wrap gap-2"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Table with responsive wrapper -->
+<!-- Table with responsive wrapper -->
+<div class="table-responsive">
+    <table class="table table-hover table-striped cat-table" id="catsTable">
+        <thead>
+            <tr>
+                <th class="text-center" style="width: 50px;" onclick="sortTable('index')">
+                    # <span class="sort-indicator" id="sort-index"></span>
+                </th>
+                <th class="text-center" style="width: 60px;">Icon</th>
+                <th onclick="sortTable('name')">
+                    Name <span class="sort-indicator" id="sort-name"></span>
+                </th>
+                <th class="text-center" onclick="sortTable('sex')">
+                    Sex <span class="sort-indicator" id="sort-sex"></span>
+                </th>
+                <th onclick="sortTable('room')">
+                    Room <span class="sort-indicator" id="sort-room"></span>
+                </th>
+                <th class="text-center" onclick="sortTable('level')">
+                    Level <span class="sort-indicator" id="sort-level"></span>
+                </th>
+                <th class="text-center">Class</th>
+                <th class="text-center" onclick="sortTable('age')">
+                    Age <span class="sort-indicator" id="sort-age"></span>
+                </th>
+                <th style="min-width: 100px;">Status</th>
+                <th class="text-center stat-col" onclick="sortTable('str')">
+                    ⚔️STR <span class="sort-indicator" id="sort-str"></span>
+                </th>
+                <th class="text-center stat-col" onclick="sortTable('dex')">
+                    🛡️DEX <span class="sort-indicator" id="sort-dex"></span>
+                </th>
+                <th class="text-center stat-col" onclick="sortTable('con')">
+                    ❤️CON <span class="sort-indicator" id="sort-con"></span>
+                </th>
+                <th class="text-center stat-col" onclick="sortTable('int')">
+                    🧠INT <span class="sort-indicator" id="sort-int"></span>
+                </th>
+                <th class="text-center stat-col" onclick="sortTable('cha')">
+                    🗣️CHA <span class="sort-indicator" id="sort-cha"></span>
+                </th>
+                <th class="text-center stat-col" onclick="sortTable('spd')">
+                    ⚡SPD <span class="sort-indicator" id="sort-spd"></span>
+                </th>
+                <th class="text-center stat-col" onclick="sortTable('luck')">
+                    🍀LUCK <span class="sort-indicator" id="sort-luck"></span>
+                </th>
+                <th class="text-center" onclick="sortTable('mature')">
+                    Mature <span class="sort-indicator" id="sort-mature"></span>
+                </th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            @for (int i = 0; i < Model.Count; i++) {
+                var cat = Model[i];
+                <tr data-cat-id="@cat.Key"
+                    data-sex="@cat.Sex"
+                    data-room="@cat.Room"
+                    data-level="@(cat.Level ?? 0)"
+                    data-age="@(cat.Age ?? 0)"
+                    data-status="@(cat.IsDead ? "dead" : cat.IsSick ? "sick" : cat.IsRetired ? "retired" : "healthy")"
+                    data-mature="@(cat.Age >= 30 ? "mature" : "immature")"
+                    data-name="@cat.Name"
+                    data-name-lower="@cat.Name.ToLower()"
+                    data-str="@(cat.Stats?.Str ?? 0)"
+                    data-dex="@(cat.Stats?.Dex ?? 0)"
+                    data-con="@(cat.Stats?.Con ?? 0)"
+                    data-int="@(cat.Stats?.Int ?? 0)"
+                    data-cha="@(cat.Stats?.Cha ?? 0)"
+                    data-spd="@(cat.Stats?.Spd ?? 0)"
+                    data-luck="@(cat.Stats?.Luck ?? 0)"
+                    class="@(cat.IsDead ? "table-danger" : cat.IsSick ? "table-warning" : "")">
+                    <td class="text-center align-middle">@(i + 1)</td>
+                    <td class="text-center align-middle">
+                        @if (cat.Sex == "Male") {
+                            <i class="bi bi-gender-male male cat-icon" style="font-size: 1.5rem; color: #0d6efd;"></i>
+                        } else if (cat.Sex == "Female") {
+                            <i class="bi bi-gender-female female cat-icon" style="font-size: 1.5rem; color: #d63384;"></i>
+                        } else {
+                            <i class="bi bi-question-circle cat-icon" style="font-size: 1.5rem; color: #6c757d;"></i>
+                        }
+                    </td>
+                    <td class="align-middle">
+                        <strong>@cat.Name</strong>
+                        <br />
+                        <small class="text-muted">ID: @cat.Key</small>
+                    </td>
+                    <td class="text-center align-middle">
+                        @if (cat.Sex == "Male") {
+                            <span class="badge bg-primary">♂ Male</span>
+                        } else if (cat.Sex == "Female") {
+                            <span class="badge bg-danger">♀ Female</span>
+                        } else {
+                            <span class="badge bg-secondary">?</span>
+                        }
+                    </td>
+                    <td class="align-middle">
+                        <i class="bi bi-door-open me-1"></i>
+                        @cat.Room
+                    </td>
+                    <td class="fw-bold text-center align-middle">
+                        @if (cat.Level.HasValue) {
+                            <span class="badge bg-success">@cat.Level</span>
+                        } else {
+                            <span class="badge bg-light text-dark">-</span>
+                        }
+                    </td>
+                    <td class="text-center align-middle">
+                        @if (!string.IsNullOrEmpty(cat.ClassName)) {
+                            <span class="badge bg-info">@cat.ClassName</span>
+                        } else {
+                            <span class="text-muted">-</span>
+                        }
+                    </td>
+                    <td class="text-center align-middle">
+                        @if (cat.Age.HasValue) {
+                            if (cat.Age < 30) {
+                                <span class="badge bg-success">@cat.Age d</span>
+                            } else if (cat.Age < 100) {
+                                <span class="badge bg-warning">@cat.Age d</span>
+                            } else {
+                                <span class="badge bg-secondary">@cat.Age d</span>
+                            }
+                        } else {
+                            <span class="text-muted">-</span>
+                        }
+                    </td>
+                    <td class="align-middle">
+                        <div class="d-flex flex-column gap-1">
+                            @if (cat.IsDead) {
+                                <span class="badge bg-danger">
+                                    <i class="bi bi-skull me-1"></i>Dead
+                                </span>
+                            }
+                            @if (cat.IsSick) {
+                                <span class="badge bg-warning">
+                                    <i class="bi bi-virus me-1"></i>Sick
+                                </span>
+                            }
+                            @if (cat.IsRetired) {
+                                <span class="badge bg-secondary">
+                                    <i class="bi bi-arrow-left-square me-1"></i>Retired
+                                </span>
+                            }
+                            @if (!cat.IsDead && !cat.IsSick && !cat.IsRetired) {
+                                <span class="badge bg-success">
+                                    <i class="bi bi-check-circle me-1"></i>Healthy
+                                </span>
+                            }
+                        </div>
+                    </td>
+                    <td class="text-center align-middle stat-value">@(cat.Stats?.Str ?? 0)</td>
+                    <td class="text-center align-middle stat-value">@(cat.Stats?.Dex ?? 0)</td>
+                    <td class="text-center align-middle stat-value">@(cat.Stats?.Con ?? 0)</td>
+                    <td class="text-center align-middle stat-value">@(cat.Stats?.Int ?? 0)</td>
+                    <td class="text-center align-middle stat-value">@(cat.Stats?.Cha ?? 0)</td>
+                    <td class="text-center align-middle stat-value">@(cat.Stats?.Spd ?? 0)</td>
+                    <td class="text-center align-middle stat-value">@(cat.Stats?.Luck ?? 0)</td>
+                    <td class="text-center align-middle">
+                        @{
+                            var isMature = cat.Age >= 30;
+                        }
+                        @if (isMature) {
+                            <span class="badge bg-success">
+                                <i class="bi bi-check-lg"></i>
+                            </span>
+                        } else {
+                            <span class="badge bg-secondary">
+                                <i class="bi bi-x-lg"></i>
+                            </span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@if (!Model.Any()) {
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle me-2"></i>
+        No cats found in the house.
+    </div>
+}
+
+<!-- Results count and auto-refresh controls -->
+<div class="row mt-3">
+    <div class="col-12">
+        <h6 class="mb-3"><i class="bi bi-bar-chart-steps me-2"></i>Stats Filters</h6>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">⚔️ STR Range</label>
+        <div class="d-flex gap-2">
+            <input type="number" class="form-control filter-input stat-filter" id="minStr" placeholder="Min" min="1" max="10" onchange="applyFilters()">
+            <input type="number" class="form-control filter-input stat-filter" id="maxStr" placeholder="Max" min="1" max="10" onchange="applyFilters()">
+        </div>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">🛡️ DEX Range</label>
+        <div class="d-flex gap-2">
+            <input type="number" class="form-control filter-input stat-filter" id="minDex" placeholder="Min" min="1" max="10" onchange="applyFilters()">
+            <input type="number" class="form-control filter-input stat-filter" id="maxDex" placeholder="Max" min="1" max="10" onchange="applyFilters()">
+        </div>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">❤️ CON Range</label>
+        <div class="d-flex gap-2">
+            <input type="number" class="form-control filter-input stat-filter" id="minCon" placeholder="Min" min="1" max="10" onchange="applyFilters()">
+            <input type="number" class="form-control filter-input stat-filter" id="maxCon" placeholder="Max" min="1" max="10" onchange="applyFilters()">
+        </div>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">🧠 INT Range</label>
+        <div class="d-flex gap-2">
+            <input type="number" class="form-control filter-input stat-filter" id="minInt" placeholder="Min" min="1" max="10" onchange="applyFilters()">
+            <input type="number" class="form-control filter-input stat-filter" id="maxInt" placeholder="Max" min="1" max="10" onchange="applyFilters()">
+        </div>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">🗣️ CHA Range</label>
+        <div class="d-flex gap-2">
+            <input type="number" class="form-control filter-input stat-filter" id="minCha" placeholder="Min" min="1" max="10" onchange="applyFilters()">
+            <input type="number" class="form-control filter-input stat-filter" id="maxCha" placeholder="Max" min="1" max="10" onchange="applyFilters()">
+        </div>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">⚡ SPD Range</label>
+        <div class="d-flex gap-2">
+            <input type="number" class="form-control filter-input stat-filter" id="minSpd" placeholder="Min" min="1" max="10" onchange="applyFilters()">
+            <input type="number" class="form-control filter-input stat-filter" id="maxSpd" placeholder="Max" min="1" max="10" onchange="applyFilters()">
+        </div>
+    </div>
+    <div class="col-md-2 mt-2">
+        <label class="form-label">🍀 LUCK Range</label>
+        <div class="d-flex gap-2">
+            <input type="number" class="form-control filter-input stat-filter" id="minLuck" placeholder="Min" min="1" max="10" onchange="applyFilters()">
+            <input type="number" class="form-control filter-input stat-filter" id="maxLuck" placeholder="Max" min="1" max="10" onchange="applyFilters()">
+        </div>
+    </div>
+</div>
+
+<!-- Modal for stats -->
+<div class="modal fade" id="statsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Cat Statistics</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="statsModalBody">
+                Loading...
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let autoRefreshTimer = null;
+    let currentSort = {
+        column: 'name',
+        direction: 'asc'
+    };
+
+    // Save filters to localStorage
+    function saveFilters() {
+        const filters = {
+            searchName: document.getElementById('searchName').value,
+            filterSex: document.getElementById('filterSex').value,
+            filterRoom: document.getElementById('filterRoom').value,
+            filterStatus: document.getElementById('filterStatus').value,
+            minLevel: document.getElementById('minLevel').value,
+            maxLevel: document.getElementById('maxLevel').value,
+            filterMature: document.getElementById('filterMature').value,
+            minAge: document.getElementById('minAge').value,
+            maxAge: document.getElementById('maxAge').value,
+            minStr: document.getElementById('minStr').value,
+            maxStr: document.getElementById('maxStr').value,
+            minDex: document.getElementById('minDex').value,
+            maxDex: document.getElementById('maxDex').value,
+            minCon: document.getElementById('minCon').value,
+            maxCon: document.getElementById('maxCon').value,
+            minInt: document.getElementById('minInt').value,
+            maxInt: document.getElementById('maxInt').value,
+            minCha: document.getElementById('minCha').value,
+            maxCha: document.getElementById('maxCha').value,
+            minSpd: document.getElementById('minSpd').value,
+            maxSpd: document.getElementById('maxSpd').value,
+            minLuck: document.getElementById('minLuck').value,
+            maxLuck: document.getElementById('maxLuck').value
+        };
+        localStorage.setItem('catFilters', JSON.stringify(filters));
+    }
+
+    // Load filters from localStorage
+    function loadFilters() {
+        const saved = localStorage.getItem('catFilters');
+        if (saved) {
+            try {
+                const filters = JSON.parse(saved);
+                Object.keys(filters).forEach(key => {
+                    const element = document.getElementById(key);
+                    if (element) {
+                        element.value = filters[key];
+                    }
+                });
+            } catch (e) {
+                console.error('Error loading filters:', e);
+            }
+        }
+    }
+
+    // Sort table by column
+    function sortTable(column) {
+        if (currentSort.column === column) {
+            // Toggle direction
+            currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+        } else {
+            // New column
+            currentSort.column = column;
+            currentSort.direction = 'asc';
+        }
+
+        // Update sort indicators
+        updateSortIndicators();
+
+        // Apply sorting
+        applySort();
+    }
+
+    function updateSortIndicators() {
+        // Clear all indicators
+        document.querySelectorAll('.sort-indicator').forEach(el => {
+            el.innerHTML = '';
+        });
+
+        // Set current indicator
+        const indicator = document.getElementById(`sort-${currentSort.column}`);
+        if (indicator) {
+            indicator.innerHTML = currentSort.direction === 'asc' ? ' ↑' : ' ↓';
+        }
+    }
+
+    function applySort() {
+        const tbody = document.getElementById('tableBody');
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+
+        // Filter out hidden rows
+        const visibleRows = rows.filter(row => row.style.display !== 'none');
+
+        // Sort visible rows
+        visibleRows.sort((a, b) => {
+            let aVal, bVal;
+
+            switch (currentSort.column) {
+                case 'index':
+                    aVal = parseInt(a.cells[0].textContent);
+                    bVal = parseInt(b.cells[0].textContent);
+                    break;
+                case 'name':
+                    aVal = a.dataset.nameLower;
+                    bVal = b.dataset.nameLower;
+                    return currentSort.direction === 'asc'
+                        ? aVal.localeCompare(bVal)
+                        : bVal.localeCompare(aVal);
+                case 'sex':
+                    aVal = a.dataset.sex;
+                    bVal = b.dataset.sex;
+                    return currentSort.direction === 'asc'
+                        ? aVal.localeCompare(bVal)
+                        : bVal.localeCompare(aVal);
+                case 'room':
+                    aVal = a.dataset.room;
+                    bVal = b.dataset.room;
+                    return currentSort.direction === 'asc'
+                        ? aVal.localeCompare(bVal)
+                        : bVal.localeCompare(aVal);
+                case 'level':
+                    aVal = parseInt(a.dataset.level);
+                    bVal = parseInt(b.dataset.level);
+                    break;
+                case 'age':
+                    aVal = parseInt(a.dataset.age);
+                    bVal = parseInt(b.dataset.age);
+                    break;
+                case 'str':
+                    aVal = parseInt(a.dataset.str);
+                    bVal = parseInt(b.dataset.str);
+                    break;
+                case 'dex':
+                    aVal = parseInt(a.dataset.dex);
+                    bVal = parseInt(b.dataset.dex);
+                    break;
+                case 'con':
+                    aVal = parseInt(a.dataset.con);
+                    bVal = parseInt(b.dataset.con);
+                    break;
+                case 'int':
+                    aVal = parseInt(a.dataset.int);
+                    bVal = parseInt(b.dataset.int);
+                    break;
+                case 'spd':
+                    aVal = parseInt(a.dataset.spd);
+                    bVal = parseInt(b.dataset.spd);
+                    break;
+                case 'mature':
+                    aVal = a.dataset.mature;
+                    bVal = b.dataset.mature;
+                    return currentSort.direction === 'asc'
+                        ? aVal.localeCompare(bVal)
+                        : bVal.localeCompare(aVal);
+                default:
+                    return 0;
+            }
+
+            // Numeric comparison
+            if (currentSort.direction === 'asc') {
+                return aVal - bVal;
+            } else {
+                return bVal - aVal;
+            }
+        });
+
+        // Reorder rows in the table
+        visibleRows.forEach((row, index) => {
+            tbody.appendChild(row);
+            row.cells[0].textContent = index + 1; // Update row numbers
+        });
+    }
+
+    function applyFilters() {
+        const searchName = document.getElementById('searchName').value.toLowerCase();
+        const filterSex = document.getElementById('filterSex').value;
+        const filterRoom = document.getElementById('filterRoom').value;
+        const filterStatus = document.getElementById('filterStatus').value;
+        const minLevel = parseInt(document.getElementById('minLevel').value) || 0;
+        const maxLevel = parseInt(document.getElementById('maxLevel').value) || 99;
+        const filterMature = document.getElementById('filterMature').value;
+        const minAge = parseInt(document.getElementById('minAge').value) || 0;
+        const maxAge = parseInt(document.getElementById('maxAge').value) || 9999;
+
+        // Stat filters
+        const minStr = parseInt(document.getElementById('minStr').value) || 0;
+        const maxStr = parseInt(document.getElementById('maxStr').value) || 99;
+        const minDex = parseInt(document.getElementById('minDex').value) || 0;
+        const maxDex = parseInt(document.getElementById('maxDex').value) || 99;
+        const minCon = parseInt(document.getElementById('minCon').value) || 0;
+        const maxCon = parseInt(document.getElementById('maxCon').value) || 99;
+        const minInt = parseInt(document.getElementById('minInt').value) || 0;
+        const maxInt = parseInt(document.getElementById('maxInt').value) || 99;
+        const minCha = parseInt(document.getElementById('minCha').value) || 0;
+        const maxCha = parseInt(document.getElementById('maxCha').value) || 99;
+        const minSpd = parseInt(document.getElementById('minSpd').value) || 0;
+        const maxSpd = parseInt(document.getElementById('maxSpd').value) || 99;
+        const minLuck = parseInt(document.getElementById('minLuck').value) || 0;
+        const maxLuck = parseInt(document.getElementById('maxLuck').value) || 99;
+
+        const rows = document.querySelectorAll('#tableBody tr');
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            const sex = row.dataset.sex;
+            const room = row.dataset.room;
+            const level = parseInt(row.dataset.level);
+            const age = parseInt(row.dataset.age);
+            const status = row.dataset.status;
+            const mature = row.dataset.mature;
+            const name = row.dataset.nameLower;
+
+            // Stats
+            const str = parseInt(row.dataset.str);
+            const dex = parseInt(row.dataset.dex);
+            const con = parseInt(row.dataset.con);
+            const int = parseInt(row.dataset.int);
+            const cha = parseInt(row.dataset.cha);
+            const spd = parseInt(row.dataset.spd);
+            const luck = parseInt(row.dataset.luck);
+
+            let show = true;
+
+            // Apply filters
+            if (searchName && !name.includes(searchName)) show = false;
+            if (filterSex !== 'all' && sex !== filterSex) show = false;
+            if (filterRoom !== 'all' && room !== filterRoom) show = false;
+            if (filterStatus !== 'all' && status !== filterStatus) show = false;
+            if (filterMature !== 'all' && mature !== filterMature) show = false;
+            if (level < minLevel || level > maxLevel) show = false;
+            if (age < minAge || age > maxAge) show = false;
+
+            // Stat filters
+            if (str < minStr || str > maxStr) show = false;
+            if (dex < minDex || dex > maxDex) show = false;
+            if (con < minCon || con > maxCon) show = false;
+            if (int < minInt || int > maxInt) show = false;
+            if (cha < minCha || cha > maxCha) show = false;
+            if (spd < minSpd || spd > maxSpd) show = false;
+            if (luck < minLuck || luck > maxLuck) show = false;
+
+            row.style.display = show ? '' : 'none';
+            if (show) visibleCount++;
+        });
+
+        // Apply current sort to visible rows
+        applySort();
+
+        // Update filter tags and count
+        updateFilterTags();
+        document.getElementById('visibleCount').textContent = visibleCount;
+
+        // Save filters
+        saveFilters();
+    }
+
+    function updateFilterTags() {
+        const tags = [];
+        const searchName = document.getElementById('searchName').value;
+        const filterSex = document.getElementById('filterSex').value;
+        const filterRoom = document.getElementById('filterRoom').value;
+        const filterStatus = document.getElementById('filterStatus').value;
+        const minLevel = document.getElementById('minLevel').value;
+        const maxLevel = document.getElementById('maxLevel').value;
+        const filterMature = document.getElementById('filterMature').value;
+        const minAge = document.getElementById('minAge').value;
+        const maxAge = document.getElementById('maxAge').value;
+
+        // Stat filters
+        const minStr = document.getElementById('minStr').value;
+        const maxStr = document.getElementById('maxStr').value;
+        const minDex = document.getElementById('minDex').value;
+        const maxDex = document.getElementById('maxDex').value;
+        const minCon = document.getElementById('minCon').value;
+        const maxCon = document.getElementById('maxCon').value;
+        const minInt = document.getElementById('minInt').value;
+        const maxInt = document.getElementById('maxInt').value;
+        const minCha = document.getElementById('minCha').value;
+        const maxCha = document.getElementById('maxCha').value;
+        const minSpd = document.getElementById('minSpd').value;
+        const maxSpd = document.getElementById('maxSpd').value;
+        const minLuck = document.getElementById('minLuck').value;
+        const maxLuck = document.getElementById('maxLuck').value;
+
+        if (searchName) tags.push(`Name: "${searchName}"`);
+        if (filterSex !== 'all') tags.push(`Sex: ${filterSex}`);
+        if (filterRoom !== 'all') tags.push(`Room: ${filterRoom}`);
+        if (filterStatus !== 'all') tags.push(`Status: ${filterStatus}`);
+        if (minLevel || maxLevel) tags.push(`Level: ${minLevel || '0'}-${maxLevel || '99'}`);
+        if (filterMature !== 'all') tags.push(`Maturity: ${filterMature}`);
+        if (minAge || maxAge) tags.push(`Age: ${minAge || '0'}-${maxAge || '9999'}`);
+
+        if (minStr || maxStr) tags.push(`STR: ${minStr || '0'}-${maxStr || '99'}`);
+        if (minDex || maxDex) tags.push(`DEX: ${minDex || '0'}-${maxDex || '99'}`);
+        if (minCon || maxCon) tags.push(`CON: ${minCon || '0'}-${maxCon || '99'}`);
+        if (minInt || maxInt) tags.push(`INT: ${minInt || '0'}-${maxInt || '99'}`);
+        if (minCha || maxCha) tags.push(`CHA: ${minCha || '0'}-${maxCha || '99'}`);
+        if (minSpd || maxSpd) tags.push(`SPD: ${minSpd || '0'}-${maxSpd || '99'}`);
+        if (minLuck || maxLuck) tags.push(`LUCK: ${minLuck || '0'}-${maxLuck || '99'}`);
+
+        const filterTags = document.getElementById('filterTags');
+        const activeFilters = document.getElementById('activeFilters');
+
+        if (tags.length > 0) {
+            filterTags.innerHTML = tags.map(tag =>
+                `<span class="badge bg-info">${tag}</span>`
+            ).join(' ');
+            activeFilters.style.display = 'block';
+        } else {
+            activeFilters.style.display = 'none';
+        }
+    }
+
+    function resetFilters() {
+        // Reset all filter inputs
+        document.querySelectorAll('.filter-input').forEach(input => {
+            if (input.tagName === 'SELECT') {
+                input.value = 'all';
+            } else {
+                input.value = '';
+            }
+        });
+
+        // Reset sort to default
+        currentSort = { column: 'name', direction: 'asc' };
+        updateSortIndicators();
+
+        applyFilters();
+        localStorage.removeItem('catFilters');
+    }
+
+    async function refreshData() {
+        const refreshBtn = document.querySelector('[onclick="refreshData()"] i');
+        if (refreshBtn) {
+            refreshBtn.classList.add('spinning');
+        }
+
+        try {
+            const response = await fetch('/Index?handler=Refresh');
+            if (!response.ok) throw new Error('Refresh failed');
+
+            const html = await response.text();
+            document.getElementById('catsTableContainer').innerHTML = html;
+
+            // Reload filters and sort after refresh
+            loadFilters();
+            updateSortIndicators();
+            applyFilters();
+
+        } catch (error) {
+            console.error('Refresh error:', error);
+            alert('Failed to refresh data');
+        } finally {
+            if (refreshBtn) {
+                refreshBtn.classList.remove('spinning');
+            }
+        }
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function () {
+        loadFilters();
+        updateSortIndicators();
+        applyFilters();
+
+        // Make table headers clickable
+        document.querySelectorAll('#catsTable th[onclick]').forEach(th => {
+            th.style.cursor = 'pointer';
+            th.title = 'Click to sort';
+        });
+    });
+</script>
+
+<!-- Additional styles -->
+<style>
+    .cat-table th,
+    .cat-table td {
+        vertical-align: middle;
+        text-align: left;
+    }
+
+    .cat-table th {
+        cursor: pointer;
+        user-select: none;
+    }
+
+        .cat-table th:hover {
+            background-color: #e9ecef;
+        }
+
+        .cat-table th.text-center,
+        .cat-table td.text-center {
+            text-align: center;
+        }
+
+    .cat-table td .badge {
+        font-size: 0.85rem;
+        padding: 0.35em 0.65em;
+    }
+
+    .stat-col {
+        min-width: 60px;
+        background-color: #f8f9fa;
+    }
+
+    .stat-value {
+        font-family: monospace;
+        font-weight: bold;
+    }
+
+    .sort-indicator {
+        font-size: 0.8rem;
+        margin-left: 3px;
+        color: #0d6efd;
+    }
+
+    #filterTags .badge {
+        font-size: 0.9rem;
+        padding: 0.5em 0.8em;
+    }
+
+    .spinning {
+        animation: spin 1s linear infinite;
+    }
+
+    @@keyframes spin {
+        from {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* Responsive adjustments */
+    @@media (max-width: 768px) {
+        .cat-table {
+            font-size: 0.8rem;
+        }
+
+            .cat-table td .badge {
+                font-size: 0.75rem;
+            }
+
+        .stat-col {
+            min-width: 50px;
+        }
+    }
+</style>
