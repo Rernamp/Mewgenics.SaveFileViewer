@@ -44,5 +44,16 @@ namespace Mewgenics.SaveFileViewer.Controllers {
             var count = await _catService.GetCatsCountAsync();
             return Ok(count);
         }
+
+        [HttpGet("house")]
+        public async Task<ActionResult<List<HouseCat>>> GetHouseCats() {
+            try {
+                var houseCats = await _catService.GetHouseCatsAsync();
+                return Ok(houseCats);
+            } catch (Exception ex) {
+                _logger.LogError(ex, "Error getting house cats");
+                return StatusCode(500, "Internal server error");
+            }
+        }
     }
 }

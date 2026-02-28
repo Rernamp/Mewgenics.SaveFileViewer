@@ -35,6 +35,9 @@ namespace Mewgenics.SaveFileViewer.Models {
         public bool Retired { get; set; }
         public bool Dead { get; set; }
         public bool Donated { get; set; }
+        public bool IsSick { get; set; }
+        public bool IsHungry { get; set; }
+        public bool IsHappy { get; set; }
     }
 
     public class CatStats {
@@ -45,6 +48,7 @@ namespace Mewgenics.SaveFileViewer.Models {
         public int Spd { get; set; }
         public int Cha { get; set; }
         public int Luck { get; set; }
+        public int Level { get; set; }
     }
 
     public class CombatState {
@@ -121,5 +125,26 @@ namespace Mewgenics.SaveFileViewer.Models {
         public static (string Label, string Category) GetInfo(int slotIndex) {
             return SlotInfo.TryGetValue(slotIndex, out var info) ? info : ($"Slot {slotIndex}", "Unknown");
         }
+    }
+
+    public class HouseCat {
+        public int Key { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Sex { get; set; } = "Unknown";
+        public string Room { get; set; } = string.Empty;
+        public int? Level { get; set; }
+        public string? ClassName { get; set; }
+        public bool IsDead { get; set; }
+        public bool IsSick { get; set; }
+        public string DisplayName => $"{Name} (Key: {Key})";
+    }
+
+    public class HouseCatEntry {
+        public int Key { get; set; }
+        public string Room { get; set; } = string.Empty;
+        public int UnkU32 { get; set; }
+        public double P0 { get; set; }
+        public double P1 { get; set; }
+        public double P2 { get; set; }
     }
 }

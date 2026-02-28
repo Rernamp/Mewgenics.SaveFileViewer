@@ -8,12 +8,21 @@ namespace Mewgenics.SaveFileViewer.Data {
         }
 
         public DbSet<CatEntity> Cats { get; set; }
+        public DbSet<FileEntity> Files { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder) {
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<CatEntity>(entity => {
                 entity.ToTable("cats");
+                entity.HasKey(e => e.Key);
+                entity.Property(e => e.Key).HasColumnName("key");
+                entity.Property(e => e.Data).HasColumnName("data");
+            });
+
+            modelBuilder.Entity<FileEntity>(entity =>
+            {
+                entity.ToTable("files");
                 entity.HasKey(e => e.Key);
                 entity.Property(e => e.Key).HasColumnName("key");
                 entity.Property(e => e.Data).HasColumnName("data");

@@ -1,8 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Mewgenics.SaveFileViewer.Data;
 using Mewgenics.SaveFileViewer.Services;
-using Mewgenics.SaveFileViewer.Data;
-using Mewgenics.SaveFileViewer.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,14 +19,15 @@ if (string.IsNullOrEmpty(dbPath)) {
 }
 
 Console.WriteLine($"Using database: {dbPath}");
+builder.Configuration["DbPath"] = dbPath;
 
 // Configure DbContext with SQLite
-builder.Services.AddDbContextPool<CatDbContext>(options => {
+builder.Services.AddDbContext<CatDbContext>(options => {
     var connectionString = $"Data Source={dbPath};Mode=ReadOnly";
     options.UseSqlite(connectionString);
-    options.EnableSensitiveDataLogging(false); // ��������� ����������� ��� ��������
+    options.EnableSensitiveDataLogging(false);
     options.EnableDetailedErrors(false);
-}, poolSize: 128);
+});
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -37,13 +36,11 @@ builder.Services.AddSwaggerGen();
 // Add memory cache
 builder.Services.AddMemoryCache();
 
-// Register services
+// Register services - ВАЖНО: все Scoped
+builder.Services.AddSingleton<IFileChangeWatcher, FileChangeWatcher>(); // Singleton
 builder.Services.AddScoped<ILZ4Decompressor, LZ4Decompressor>();
 builder.Services.AddScoped<ICatParser, CatParser>();
 builder.Services.AddScoped<ICatService, CatService>();
-
-// Register hosted service for data preloading
-builder.Services.AddHostedService<DataInitializer>();
 
 builder.Services.AddCors(options => {
     options.AddPolicy("AllowFrontend", policy => {
@@ -66,8 +63,19 @@ app.UseCors("AllowFrontend");
 app.UseAuthorization();
 app.MapControllers();
 
-// ��������� �������� ����� ������ ������� ��� ��������
-await Task.Delay(500);
+// Предзагрузка данных при старте
+try {
+    using var scope = app.Services.CreateScope();
+    var catService = scope.ServiceProvider.GetRequiredService<ICatService>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+
+    logger.LogInformation("Preloading cats at startup...");
+    var cats = await catService.GetAllCatsAsync();
+    logger.LogInformation($"Preloaded {cats.Count} cats");
+} catch (Exception ex) {
+    var logger = app.Services.GetRequiredService<ILogger<Program>>();
+    logger.LogError(ex, "Failed to preload cats");
+}
 
 await app.RunAsync();
 
