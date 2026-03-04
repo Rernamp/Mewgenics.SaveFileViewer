@@ -33,12 +33,12 @@ namespace Mewgenics.SaveFileViewer.Services {
             _logger.LogInformation($"Starting file watcher for: {_filePath}");
 
             _watcher = new FileSystemWatcher(directory, fileName) {
-                NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.Size,
-                EnableRaisingEvents = true
+                NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.Size                
             };
 
             _watcher.Changed += OnFileChanged;
             _watcher.Created += OnFileChanged;
+            _watcher.EnableRaisingEvents = true;
         }
 
         public void StopWatching() {

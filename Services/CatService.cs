@@ -39,10 +39,11 @@ namespace Mewgenics.SaveFileViewer.Services {
             _logger = logger;
             _serviceProvider = serviceProvider;
             _cache = cache;
-
+            logger.LogInformation("Construct CatService");
             // Получаем watcher при первом использовании
             _fileWatcher = _serviceProvider.GetRequiredService<IFileChangeWatcher>();
             _fileWatcher.FileChanged += OnFileChanged;
+            _fileWatcher.StartWatching();
         }
 
 
