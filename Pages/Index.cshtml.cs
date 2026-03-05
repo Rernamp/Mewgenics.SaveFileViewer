@@ -27,6 +27,19 @@ namespace Mewgenics.SaveFileViewer.Pages {
             }
         }
 
+        public async Task<IActionResult> OnGetStatsAsync()
+        {
+            var cats = await _catService.GetHouseCatsAsync();
+            var stats = new
+            {
+                total = cats.Count,
+                male = cats.Count(c => c.Sex == "Male"),
+                female = cats.Count(c => c.Sex == "Female"),
+                sick = cats.Count(c => c.IsSick)
+            };
+            return new JsonResult(stats);
+        }
+
         public async Task<IActionResult> OnGetRefreshAsync() {
             try {
 
